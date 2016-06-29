@@ -228,6 +228,7 @@
     <Compile Include="Models\Category.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\DOBValidator.cs" />
     <Compile Include="Models\Fare.cs" />
     <Compile Include="Models\IBusRepository.cs" />
     <Compile Include="Models\IRouteRepository.cs" />
@@ -602,6 +603,8 @@
     <Content Include="Views\Search\Fare.cshtml" />
     <Content Include="Views\Login\Confirm.cshtml" />
     <Content Include="Views\Login\Seat.cshtml" />
+    <Content Include="Views\Login\Error1.cshtml" />
+    <Content Include="Views\Search\History.cshtml" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

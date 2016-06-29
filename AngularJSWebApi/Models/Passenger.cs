@@ -11,21 +11,19 @@ namespace AngularJSWebApi.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     
     public partial class Passenger
     {
-        public Passenger()
-        {
-            this.Reservations = new HashSet<Reservation>();
-        }
-    
         public int passenger_id { get; set; }
+     
         public string name { get; set; }
+        
         public int age { get; set; }
+        
         public string gender { get; set; }
         public Nullable<int> user_id { get; set; }
     
         public virtual User_details User_details { get; set; }
-        public virtual ICollection<Reservation> Reservations { get; set; }
     }
 }

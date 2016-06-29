@@ -56,11 +56,14 @@
 
 
 </body>
-@if(ViewBag.Obj!=0)
+@if (ViewBag.dup == null || ViewBag.dup=="")
 {
-    <h2 style="color:brown;">Seats Info</h2>
+    if (ViewBag.bid!=null)
+    {
+        <h2 style="color:brown;">@ViewBag.name Seats Info</h2>
     <table border="1">
         <tr>
+          
             <th>
                 Seat No
             </th>
@@ -76,7 +79,10 @@
         </tr>
         @foreach(var item in Model)
         {
-            <tr>
+            if(item.bus_id==Convert.ToInt32(ViewBag.bid))
+            {
+                <tr>
+                   
                 <td>
                     @item.seat_no
                 </td>
@@ -84,12 +90,29 @@
                     @item.bus_id
                 </td>
                 <td>
-                    @item.Bus.bus_name
+                    @ViewBag.name
                 </td>
                 <td>
                     @item.status
                 </td>
             </tr>
+            }
+            
         }
     </table>
+    }
+    <div>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    @Html.ActionLink("Confirm", "Confirm") |
+    @Html.ActionLink("Cancel", "Cancel")
+</div>
+    
+}
+else
+{
+    <h4 style="color:red">*@ViewBag.dup*</h4>
+}
+@if(ViewBag.err!=null)
+{
+    <h4 style="color:red">*@ViewBag.err*</h4>
 }

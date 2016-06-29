@@ -15,7 +15,8 @@ namespace AngularJSWebApi.Controllers
     {
         static int count = 0;
         static int counter = 0;
-        private DatabaseEntity2 db = new DatabaseEntity2();
+        static int check1;
+        private DatabaseEntity7 db = new DatabaseEntity7();
         public bool isValid(string name, string password)
         {
             string paswd = Encryptdata(password);
@@ -32,14 +33,14 @@ namespace AngularJSWebApi.Controllers
             byte[] encode = Encoding.UTF8.GetBytes(password);
             return Convert.ToBase64String(encode);
         }
-      
+
         [HttpGet]
-        public ActionResult Login(string returnUrl)
+        public ActionResult Login()
         {
-            ViewBag.ReturnUrl = returnUrl;
+            
             return View();
         }
-       
+      
         [HttpPost]
         public ActionResult Login(User_details user, string returnUrl)
         {
@@ -57,6 +58,11 @@ namespace AngularJSWebApi.Controllers
             int id = u2.user_id;
             Session["id"] = id;
             Session["name"] = u2.name;
+            int lid = 1;
+            if(Session["lid"]!=null)
+            {
+                lid = Convert.ToInt32(Session["lid"]);
+            }
             if (ModelState.IsValid)
             {
                 if (isValid(user.name, user.password))
@@ -74,7 +80,15 @@ namespace AngularJSWebApi.Controllers
                     }
                     else
                     {
-                        return RedirectToAction("Index", "Search");
+                        if(lid==1)
+                        {
+                            return RedirectToAction("Cancel", "Login");
+                        }
+                       
+                        else
+                        {
+                            return RedirectToAction("Index", "Login");
+                        }
                     }
                 }
                 return RedirectToAction("Error", "Login");
@@ -83,10 +97,18 @@ namespace AngularJSWebApi.Controllers
             {
                 return View("Error");
             }
+
         }
 
         public ActionResult Error()
         {
+            
+            return View();
+        }
+
+         public ActionResult Error1()
+        {
+            
             return View();
         }
 
@@ -125,10 +147,11 @@ namespace AngularJSWebApi.Controllers
          [Authorize]
         public ActionResult Index()
         {
-          
+
             string name = Convert.ToString(Session["name"]);
             var p = db.Passengers.Where(u => u.User_details.name == name).Select(p1 => p1).ToList();
-            return View(p);
+            return View(p);        
+          
         }
          [Authorize]
         [HttpGet]
@@ -140,6 +163,7 @@ namespace AngularJSWebApi.Controllers
              }
              else
              {
+                 ViewBag.count = count;
                  ViewBag.message = "Sorry,You cannot add more than 5";
                  return View();
              }
@@ -156,6 +180,7 @@ namespace AngularJSWebApi.Controllers
             p1.age = p.age;
             p1.gender = p.gender;
             p1.user_id = uid;
+            Session["Passenger"] = p1;
             if(ModelState.IsValid)
             {
                 
@@ -332,22 +357,35 @@ namespace AngularJSWebApi.Controllers
                      }
                  }
              }
+             Reservation r = new Reservation();
+             r.date_of_journey = bus.start_date;
+             r.bus_id = bus.bus_id;
+             r.user_id = Convert.ToInt32(Session["id"]);
+             r.total_fare = Convert.ToInt32(totalfare);
+             db.Reservations.Add(r);
+             db.SaveChanges();
              ViewBag.fare = totalfare;
+             Session["fare"] = totalfare;
+             ViewBag.rid = r.reservation_id;
+             Bus b1 = new Bus();
+             b1.bus_id = bus.bus_id;
+             b1.bus_name = bus.bus_name;
+             b1.bus_no = bus.bus_no;
+             b1.category_id = bus.category_id;
+             b1.route_id = bus.route_id;
+             b1.start_date = bus.start_date;
+             b1.end_date = bus.end_date;
+             b1.departure_time = bus.departure_time;
+             b1.capacity = bus.capacity - counter;
+             db.Entry(b1).State = EntityState.Modified;
+             db.SaveChanges();
              return View(list);
          }
 
         [Authorize]
         public ActionResult Cancel()
         {
-            int uid = Convert.ToInt32(Session["id"]);
-            foreach(var obj in db.Passengers.ToList())
-            {
-                if(obj.user_id==uid)
-                {
-                    db.Passengers.Remove(obj);
-                    db.SaveChanges();
-                }
-            }
+            db.Database.ExecuteSqlCommand("delete from Passenger");
             count = 0;
             return RedirectToAction("Index", "Search");
         }
@@ -355,23 +393,95 @@ namespace AngularJSWebApi.Controllers
         [HttpGet]
         public ActionResult Seat()
         {
-            return View(db.Bus_Seat.ToList());
+                if(count==0)
+                {
+                    return RedirectToAction("Error1", "Login");
+                }
+                else
+                {
+                    return View(db.Bus_Seat.ToList());
+                }
+               
+           
         }
         [Authorize]
         [HttpPost]
         public ActionResult Seat(string ida1, string ida2, string ida3, string ida4, string idb1, string idb2, string idb3, string idb4)
         {
             Bus b = Session["Obj"] as Bus;
+            Passenger p = Session["Passenger"] as Passenger;
+            List<Bus_Seat> list = db.Bus_Seat.ToList();
+            
+            var bus1 = db.Buses.Find(b.bus_id);
+           
             if(ida1!="" && ida1!=null)
             {
                 Bus_Seat seat = new Bus_Seat();
                 seat.seat_no= ida1;
                 seat.bus_id = b.bus_id;
                 seat.status = "Filled";
-                db.Bus_Seat.Add(seat);
-                db.SaveChanges();
+                foreach(var bs1 in db.Bus_Seat.ToList())
+                {
+                    if(bs1.bus_id==b.bus_id)
+                    {
+                        if (list.Count == 0)
+                        {
+                            db.Bus_Seat.Add(seat);
+                            db.SaveChanges();
+                            counter++;
+
+                        }
+                        else
+                        {
+                            if (count == counter)
+                            {
+                                foreach (var bs in db.Bus_Seat.ToList())
+                                {
+                                    if (bs.seat_no != ida1 && bs.bus_id == b.bus_id)
+                                    {
+                                        db.Bus_Seat.Add(seat);
+                                        db.SaveChanges();
+                                        counter++;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ViewBag.dup = "Sorry,Seat Already Booked";
+                                        return View();
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                ViewBag.err = "Passengers selected are less when compared to seats";
+                                return View();
+                            }
+                            
+                        }
+                
+                    }
+                    else
+                    {
+                        foreach (var bs in db.Bus_Seat.ToList())
+                        {
+                            
+                            if (bs.bus_id != b.bus_id && check1==0 ) 
+                            {
+                                db.Bus_Seat.Add(seat);
+                                db.SaveChanges();
+                                counter++;
+                                check1++;
+                                break;
+                            }
+                            
+                        }
+                       
+                    }
+                }
                
-                counter++;
+               
+               
             }
             if (ida2 != "" && ida2 != null)
             {
@@ -379,10 +489,69 @@ namespace AngularJSWebApi.Controllers
                 seat.seat_no = ida2;
                 seat.bus_id = b.bus_id;
                 seat.status = "Filled";
-                db.Bus_Seat.Add(seat);
-                db.SaveChanges();
-              
-                counter++;
+                 foreach(var bs1 in db.Bus_Seat.ToList())
+                 {
+                    if(bs1.bus_id==b.bus_id)
+                    {
+                        if (list.Count == 0)
+                        {
+                            db.Bus_Seat.Add(seat);
+                            db.SaveChanges();
+                            counter++;
+
+                        }
+                        else
+                        {
+                            if(count==counter)
+                            {
+                                foreach (var bs in db.Bus_Seat.ToList())
+                                {
+                                    if (bs.seat_no != ida2 && bs.bus_id == b.bus_id)
+                                    {
+                                        db.Bus_Seat.Add(seat);
+                                        db.SaveChanges();
+                                        counter++;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ViewBag.dup = "Sorry,Seat Already Booked";
+                                        return View();
+                                    }
+                                }
+                                
+                            }
+                            else
+                            {
+                                ViewBag.err = "Passengers selected are less when compared to seats";
+                                return View();
+                            }
+                            
+                        }
+                
+                    }
+                    else
+                    {
+                        foreach (var bs in db.Bus_Seat.ToList())
+                        {
+
+                            if (bs.bus_id != b.bus_id && check1 == 0) 
+                            {
+                                db.Bus_Seat.Add(seat);
+                                db.SaveChanges();
+                                counter++;
+                                check1++;
+                                break;
+                            }
+                            
+                        }
+                       
+                    }
+                
+               
+               
+                }
+                
             }
             if (ida3 != "" && ida3 != null)
             {
@@ -390,10 +559,66 @@ namespace AngularJSWebApi.Controllers
                 seat.seat_no = ida3;
                 seat.bus_id = b.bus_id;
                 seat.status = "Filled";
-                db.Bus_Seat.Add(seat);
-                db.SaveChanges();
-               
-                counter++;
+                foreach (var bs1 in db.Bus_Seat.ToList())
+                {
+                    if (bs1.bus_id == b.bus_id)
+                    {
+                        if (list.Count == 0)
+                        {
+                            db.Bus_Seat.Add(seat);
+                            db.SaveChanges();
+                            counter++;
+
+                        }
+                        else
+                        {
+                            if (count == counter)
+                            {
+                                foreach (var bs in db.Bus_Seat.ToList())
+                                {
+                                    if (bs.seat_no != ida3 && bs.bus_id == b.bus_id)
+                                    {
+                                        db.Bus_Seat.Add(seat);
+                                        db.SaveChanges();
+                                        counter++;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ViewBag.dup = "Sorry,Seat Already Booked";
+                                        return View();
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                ViewBag.err = "Passengers selected are less when compared to seats";
+                                return View();
+                            }
+                            
+                        }
+
+                    }
+                    else
+                    {
+                        foreach (var bs in db.Bus_Seat.ToList())
+                        {
+
+                            if (bs.bus_id != b.bus_id && check1 == 0 )
+                            {
+                                db.Bus_Seat.Add(seat);
+                                db.SaveChanges();
+                                counter++;
+                                check1++;
+                                break;
+                            }
+
+                        }
+
+                    }
+                }
+                
             }
             if (ida4 != "" && ida4 != null)
             {
@@ -401,10 +626,65 @@ namespace AngularJSWebApi.Controllers
                 seat.seat_no = ida4;
                 seat.bus_id = b.bus_id;
                 seat.status = "Filled";
-                db.Bus_Seat.Add(seat);
-                db.SaveChanges();
-                
-                counter++;
+                foreach (var bs1 in db.Bus_Seat.ToList())
+                {
+                    if (bs1.bus_id == b.bus_id)
+                    {
+                        if (list.Count == 0)
+                        {
+                            db.Bus_Seat.Add(seat);
+                            db.SaveChanges();
+                            counter++;
+
+                        }
+                        else
+                        {
+                            if (count == counter)
+                            {
+                                foreach (var bs in db.Bus_Seat.ToList())
+                                {
+                                    if (bs.seat_no != ida4 && bs.bus_id == b.bus_id)
+                                    {
+                                        db.Bus_Seat.Add(seat);
+                                        db.SaveChanges();
+                                        counter++;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ViewBag.dup = "Sorry,Seat Already Booked";
+                                        return View();
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                ViewBag.err = "Passengers selected are less when compared to seats";
+                                return View();
+                            }
+                            
+                        }
+
+                    }
+                    else
+                    {
+                        foreach (var bs in db.Bus_Seat.ToList())
+                        {
+
+                            if (bs.bus_id != b.bus_id && check1 == 0 )
+                            {
+                                db.Bus_Seat.Add(seat);
+                                db.SaveChanges();
+                                counter++;
+                                check1++;
+                                break;
+                            }
+
+                        }
+
+                    }
+                }
             }
          
             if (idb1 != "" && idb1 != null)
@@ -413,10 +693,65 @@ namespace AngularJSWebApi.Controllers
                 seat.seat_no = idb1;
                 seat.bus_id = b.bus_id;
                 seat.status = "Filled";
-                db.Bus_Seat.Add(seat);
-                db.SaveChanges();
-              
-                counter++;
+                foreach (var bs1 in db.Bus_Seat.ToList())
+                {
+                    if (bs1.bus_id == b.bus_id)
+                    {
+                        if (list.Count == 0)
+                        {
+                            db.Bus_Seat.Add(seat);
+                            db.SaveChanges();
+                            counter++;
+
+                        }
+                        else
+                        {
+                            if (count == counter)
+                            {
+                                foreach (var bs in db.Bus_Seat.ToList())
+                                {
+                                    if (bs.seat_no != idb1 && bs.bus_id == b.bus_id)
+                                    {
+                                        db.Bus_Seat.Add(seat);
+                                        db.SaveChanges();
+                                        counter++;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ViewBag.dup = "Sorry,Seat Already Booked";
+                                        return View();
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                ViewBag.err = "Passengers selected are less when compared to seats";
+                                return View();
+                            }
+                            
+                        }
+
+                    }
+                    else
+                    {
+                        foreach (var bs in db.Bus_Seat.ToList())
+                        {
+
+                            if (bs.bus_id != b.bus_id && check1 == 0 )
+                            {
+                                db.Bus_Seat.Add(seat);
+                                db.SaveChanges();
+                                counter++;
+                                check1++;
+                                break;
+                            }
+
+                        }
+
+                    }
+                }
             }
             if (idb2 != "" && idb2 != null)
             {
@@ -424,10 +759,66 @@ namespace AngularJSWebApi.Controllers
                 seat.seat_no =idb2;
                 seat.bus_id = b.bus_id;
                 seat.status = "Filled";
-                db.Bus_Seat.Add(seat);
-                db.SaveChanges();
-              
-                counter++;
+                foreach (var bs1 in db.Bus_Seat.ToList())
+                {
+                    if (bs1.bus_id == b.bus_id)
+                    {
+                        if (list.Count == 0)
+                        {
+                            db.Bus_Seat.Add(seat);
+                            db.SaveChanges();
+                            counter++;
+
+                        }
+                        else
+                        {
+                            if (count == counter)
+                            {
+                                foreach (var bs in db.Bus_Seat.ToList())
+                                {
+                                    if (bs.seat_no != idb2 && bs.bus_id == b.bus_id)
+                                    {
+                                        db.Bus_Seat.Add(seat);
+                                        db.SaveChanges();
+                                        counter++;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ViewBag.dup = "Sorry,Seat Already Booked";
+                                        return View();
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                ViewBag.err = "Passengers selected are less when compared to seats";
+                                return View();
+                            }
+                            
+                        }
+
+                    }
+                    else
+                    {
+                        foreach (var bs in db.Bus_Seat.ToList())
+                        {
+
+                            if (bs.bus_id != b.bus_id && check1 == 0)
+                            {
+                                db.Bus_Seat.Add(seat);
+                                db.SaveChanges();
+                                counter++;
+                                check1++;
+                                break;
+                            }
+
+                        }
+
+                    }
+                }
+                
             }
             if (idb3 != "" && idb3 != null)
             {
@@ -435,10 +826,66 @@ namespace AngularJSWebApi.Controllers
                 seat.seat_no = idb3;
                 seat.bus_id = b.bus_id;
                 seat.status = "Filled";
-                db.Bus_Seat.Add(seat);
-                db.SaveChanges();
-             
-                counter++;
+                foreach (var bs1 in db.Bus_Seat.ToList())
+                {
+                    if (bs1.bus_id == b.bus_id)
+                    {
+                        if (list.Count == 0)
+                        {
+                            db.Bus_Seat.Add(seat);
+                            db.SaveChanges();
+                            counter++;
+
+                        }
+                        else
+                        {
+                            if (count == counter)
+                            {
+                                foreach (var bs in db.Bus_Seat.ToList())
+                                {
+                                    if (bs.seat_no != idb3 && bs.bus_id == b.bus_id)
+                                    {
+                                        db.Bus_Seat.Add(seat);
+                                        db.SaveChanges();
+                                        counter++;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ViewBag.dup = "Sorry,Seat Already Booked";
+                                        return View();
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                ViewBag.err = "Passengers selected are less when compared to seats";
+                                return View();
+                            }
+                            
+                        }
+
+                    }
+                    else
+                    {
+                        foreach (var bs in db.Bus_Seat.ToList())
+                        {
+
+                            if (bs.bus_id != b.bus_id && check1 == 0)
+                            {
+                                db.Bus_Seat.Add(seat);
+                                db.SaveChanges();
+                                counter++;
+                                check1++;
+                                break;
+                            }
+
+                        }
+
+                    }
+                }
+                
             }
             if (idb4 != "" && idb4 != null)
             {
@@ -446,27 +893,80 @@ namespace AngularJSWebApi.Controllers
                 seat.seat_no = idb4;
                 seat.bus_id = b.bus_id;
                 seat.status = "Filled";
-                db.Bus_Seat.Add(seat);
-                db.SaveChanges();
-              
-                counter++;
+                foreach (var bs1 in db.Bus_Seat.ToList())
+                {
+                    if (bs1.bus_id == b.bus_id)
+                    {
+                        if (list.Count == 0)
+                        {
+                            db.Bus_Seat.Add(seat);
+                            db.SaveChanges();
+                            counter++;
+
+                        }
+                        else
+                        {
+                            if (count == counter)
+                            {
+                                foreach (var bs in db.Bus_Seat.ToList())
+                                {
+                                    if (bs.seat_no != idb4 && bs.bus_id == b.bus_id)
+                                    {
+                                        db.Bus_Seat.Add(seat);
+                                        db.SaveChanges();
+                                        counter++;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ViewBag.dup = "Sorry,Seat Already Booked";
+                                        return View();
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                ViewBag.err = "Passengers selected are less when compared to seats";
+                                return View();
+                            }
+                            
+                        }
+
+                    }
+                    else
+                    {
+                        foreach (var bs in db.Bus_Seat.ToList())
+                        {
+
+                            if (bs.bus_id != b.bus_id && check1 == 0 )
+                            {
+                                db.Bus_Seat.Add(seat);
+                                db.SaveChanges();
+                                counter++;
+                                check1++;
+                                break;
+                            }
+
+                        }
+
+                    }
+                }
+                
             }
-           
-            Bus bus = Session["Obj"] as Bus;
-            Bus b1 = new Bus();
-            b1.bus_id = bus.bus_id;
-            b1.bus_name = bus.bus_name;
-            b1.bus_no = bus.bus_no;
-            b1.category_id = bus.category_id;
-            b1.route_id = bus.route_id;
-            b1.start_date = bus.start_date;
-            b1.end_date = bus.end_date;
-            b1.departure_time = bus.departure_time;
-            b1.capacity = bus.capacity - counter;
-            db.Entry(b1).State = EntityState.Modified;
-            db.SaveChanges();
-            ViewBag.obj = db.Bus_Seat.Count();
-            return View(db.Bus_Seat.ToList());
+
+            List<Bus_Seat> list2 = db.Bus_Seat.ToList();
+            
+            ViewBag.bid = b.bus_id;
+            ViewBag.name = b.bus_name;
+            foreach (var bs in list2)
+            {
+                if(bs.bus_id==bus1.bus_id)
+                {
+                    return View(list2);
+                }
+            }
+            return View();
         }
       
 	}

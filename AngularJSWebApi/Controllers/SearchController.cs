@@ -9,7 +9,7 @@ namespace AngularJSWebApi.Controllers
 {
     public class SearchController : Controller
     {
-        private DatabaseEntity2 db = new DatabaseEntity2();
+        private DatabaseEntity7 db = new DatabaseEntity7();
         [HttpGet]
         public ActionResult Index()
         {
@@ -19,19 +19,20 @@ namespace AngularJSWebApi.Controllers
         [HttpPost]
         public ActionResult Search(string source,string destination,string jdate,string cid)
         {
+            db.Database.ExecuteSqlCommand("delete from Passenger");
             ViewBag.cid = cid;
             if(cid=="-1" || jdate == "")
             {
                 ViewBag.src = source;
                 ViewBag.dest = destination;
-                var bus = db.Buses.Where(b => b.Route.source == source).Where(b => b.Route.destination == destination).Select(p => p).ToList();
+                var bus = db.Buses.Where(b => b.Route.source == source.ToLower()).Where(b => b.Route.destination == destination.ToLower()).Select(p => p).ToList();
                 ViewBag.message = bus.Count;
                 return View(bus.ToList());
             }
             else
             {
-                ViewBag.src = source;
-                ViewBag.dest = destination;
+                ViewBag.src = source.ToUpper();
+                ViewBag.dest = destination.ToUpper();
                 DateTime d = Convert.ToDateTime(jdate);
                 var routes = db.Routes.ToList();
                 Route r = new Route();
@@ -45,7 +46,7 @@ namespace AngularJSWebApi.Controllers
 
                 foreach (var route in routes)
                 {
-                    if (route.source == source && route.destination == destination)
+                    if (route.source == source.ToLower() && route.destination == destination.ToLower())
                     {
                         r.route_id = route.route_id;
                         r.distance = route.distance;
@@ -63,14 +64,17 @@ namespace AngularJSWebApi.Controllers
         public ActionResult Book(int? id)
         {
             var name = Session["name"] as string;
+            var bus = db.Buses.Find(id);
+            Session["Obj"] = bus;
             if(name!=null)
             {
-                var bus = db.Buses.Find(id);
-                Session["Obj"] = bus;
+               
                 return RedirectToAction("Index", "Login");
             }
             else
             {
+              
+                Session["lid"] = 2;
                 return RedirectToAction("Login", "Login");
             }
             
@@ -120,6 +124,42 @@ namespace AngularJSWebApi.Controllers
                 return View(f);
             }
            
+        }
+        [Authorize]
+        public ActionResult History()
+        {
+            
+            int uid = Convert.ToInt32(Session["id"]);
+         
+            List<Reservation> list1 = new List<Reservation>();
+            int c=0;
+            foreach(var rd in db.Reservations.ToList())
+            {
+                if(rd.user_id==uid)
+                {
+                    c++;
+                }
+            }
+            if(c==0)
+            {
+                ViewBag.count = c;
+                return View();
+            }
+            else
+            {
+                foreach (var res in db.Reservations.ToList())
+                {
+                    if (res.user_id == uid)
+                    {
+                        list1.Add(res);
+                       
+                    }
+                   
+                }
+            }
+
+
+            return View(list1);
         }
 	}
 }

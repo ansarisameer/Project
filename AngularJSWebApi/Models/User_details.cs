@@ -17,6 +17,7 @@ namespace AngularJSWebApi.Models
         public User_details()
         {
             this.Passengers = new HashSet<Passenger>();
+            this.Reservations = new HashSet<Reservation>();
         }
     
         public int user_id { get; set; }
@@ -28,5 +29,6 @@ namespace AngularJSWebApi.Models
         public string address { get; set; }
     
         public virtual ICollection<Passenger> Passengers { get; set; }
+        public virtual ICollection<Reservation> Reservations { get; set; }
     }
 }

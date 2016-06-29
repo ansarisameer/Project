@@ -61,9 +61,9 @@ warning 6013: The table/view 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULAR
           </Key>
           <Property Name="reservation_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="bus_id" Type="int" Nullable="false" />
-          <Property Name="passenger_id" Type="int" Nullable="false" />
-          <Property Name="date_of_journey" Type="date" Nullable="false" />
-          <Property Name="seat_no" Type="int" Nullable="false" />
+          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="date_of_journey" Type="date" />
+          <Property Name="total_fare" Type="int" />
         </EntityType>
         <EntityType Name="Route">
           <Key>
@@ -74,15 +74,6 @@ warning 6013: The table/view 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULAR
           <Property Name="destination" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="distance" Type="decimal" Precision="18" Scale="0" />
         </EntityType>
-        <!--Errors Found During Generation:
-warning 6013: The table/view 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAPI\APP_DATA\DATABASE.MDF.dbo.Ticket_price_details' does not have a primary key defined and no valid primary key could be inferred. This table/view has been excluded. To use the entity, you will need to review your schema, add the correct keys, and uncomment it.
-        <EntityType Name="Ticket_price_details">
-          <Property Name="total_amount" Type="decimal" Precision="18" Scale="0" />
-          <Property Name="user_id" Type="int" />
-          <Property Name="bus_id" Type="int" />
-          <Property Name="date_of_journey" Type="date" />
-          <Property Name="bus_name" Type="varchar" MaxLength="20" />
-        </EntityType>-->
         <EntityType Name="User_details">
           <Key>
             <PropertyRef Name="user_id" />
@@ -121,7 +112,7 @@ warning 6013: The table/view 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULAR
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Bus_Seat__bus_id__29221CFB">
+        <Association Name="FK__Bus_Seat__bus_id__3D2915A8">
           <End Role="Bus" Type="Self.Bus" Multiplicity="0..1" />
           <End Role="Bus_Seat" Type="Self.Bus_Seat" Multiplicity="*" />
           <ReferentialConstraint>
@@ -176,26 +167,20 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Reservati__passe__5FB337D6">
-          <End Role="Passenger" Type="Self.Passenger" Multiplicity="1">
+        <Association Name="FK__Reservati__user___3F115E1A">
+          <End Role="User_details" Type="Self.User_details" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
           <End Role="Reservation" Type="Self.Reservation" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Passenger">
-              <PropertyRef Name="passenger_id" />
+            <Principal Role="User_details">
+              <PropertyRef Name="user_id" />
             </Principal>
             <Dependent Role="Reservation">
-              <PropertyRef Name="passenger_id" />
+              <PropertyRef Name="user_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <!--Errors Found During Generation:
-error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAPI\APP_DATA\DATABASE.MDF.dbo.Ticket_price_details' is referenced by a relationship, but cannot be found.
-        <Association Name="FK__Ticket_pr__bus_i__4F7CD00D" />-->
-        <!--Errors Found During Generation:
-error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAPI\APP_DATA\DATABASE.MDF.dbo.Ticket_price_details' is referenced by a relationship, but cannot be found.
-        <Association Name="FK__Ticket_pr__user___2E1BDC42" />-->
         <EntityContainer Name="DatabaseModelStoreContainer">
           <EntitySet Name="Bus" EntityType="Self.Bus" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Bus_Seat" EntityType="Self.Bus_Seat" Schema="dbo" store:Type="Tables" />
@@ -212,7 +197,7 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
             <End Role="Route" EntitySet="Route" />
             <End Role="Bus" EntitySet="Bus" />
           </AssociationSet>
-          <AssociationSet Name="FK__Bus_Seat__bus_id__29221CFB" Association="Self.FK__Bus_Seat__bus_id__29221CFB">
+          <AssociationSet Name="FK__Bus_Seat__bus_id__3D2915A8" Association="Self.FK__Bus_Seat__bus_id__3D2915A8">
             <End Role="Bus" EntitySet="Bus" />
             <End Role="Bus_Seat" EntitySet="Bus_Seat" />
           </AssociationSet>
@@ -224,8 +209,8 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
             <End Role="Bus" EntitySet="Bus" />
             <End Role="Reservation" EntitySet="Reservation" />
           </AssociationSet>
-          <AssociationSet Name="FK__Reservati__passe__5FB337D6" Association="Self.FK__Reservati__passe__5FB337D6">
-            <End Role="Passenger" EntitySet="Passenger" />
+          <AssociationSet Name="FK__Reservati__user___3F115E1A" Association="Self.FK__Reservati__user___3F115E1A">
+            <End Role="User_details" EntitySet="User_details" />
             <End Role="Reservation" EntitySet="Reservation" />
           </AssociationSet>
         </EntityContainer>
@@ -249,7 +234,7 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
           <Property Name="route_id" Type="Int32" />
           <NavigationProperty Name="Category" Relationship="Self.FK__Bus__category_id__4AB81AF0" FromRole="Bus" ToRole="Category" />
           <NavigationProperty Name="Route" Relationship="Self.FK__Bus__route_id__4BAC3F29" FromRole="Bus" ToRole="Route" />
-          <NavigationProperty Name="Bus_Seat" Relationship="Self.FK__Bus_Seat__bus_id__29221CFB" FromRole="Bus" ToRole="Bus_Seat" />
+          <NavigationProperty Name="Bus_Seat" Relationship="Self.FK__Bus_Seat__bus_id__3D2915A8" FromRole="Bus" ToRole="Bus_Seat" />
           <NavigationProperty Name="Reservations" Relationship="Self.FK__Reservati__bus_i__4D94879B" FromRole="Bus" ToRole="Reservation" />
         </EntityType>
         <EntityType Name="Bus_Seat">
@@ -260,7 +245,7 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
           <Property Name="seat_no" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="bus_id" Type="Int32" />
           <Property Name="status" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="Bus" Relationship="Self.FK__Bus_Seat__bus_id__29221CFB" FromRole="Bus_Seat" ToRole="Bus" />
+          <NavigationProperty Name="Bus" Relationship="Self.FK__Bus_Seat__bus_id__3D2915A8" FromRole="Bus_Seat" ToRole="Bus" />
         </EntityType>
         <EntityType Name="Category">
           <Key>
@@ -280,7 +265,6 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
           <Property Name="gender" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <Property Name="user_id" Type="Int32" />
           <NavigationProperty Name="User_details" Relationship="Self.FK__Passenger__user___5EBF139D" FromRole="Passenger" ToRole="User_details" />
-          <NavigationProperty Name="Reservations" Relationship="Self.FK__Reservati__passe__5FB337D6" FromRole="Passenger" ToRole="Reservation" />
         </EntityType>
         <EntityType Name="Reservation">
           <Key>
@@ -288,11 +272,11 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
           </Key>
           <Property Name="reservation_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="bus_id" Type="Int32" Nullable="false" />
-          <Property Name="passenger_id" Type="Int32" Nullable="false" />
-          <Property Name="date_of_journey" Type="DateTime" Nullable="false" Precision="0" />
-          <Property Name="seat_no" Type="Int32" Nullable="false" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+          <Property Name="date_of_journey" Type="DateTime" Precision="0" />
+          <Property Name="total_fare" Type="Int32" />
           <NavigationProperty Name="Bus" Relationship="Self.FK__Reservati__bus_i__4D94879B" FromRole="Reservation" ToRole="Bus" />
-          <NavigationProperty Name="Passenger" Relationship="Self.FK__Reservati__passe__5FB337D6" FromRole="Reservation" ToRole="Passenger" />
+          <NavigationProperty Name="User_details" Relationship="Self.FK__Reservati__user___3F115E1A" FromRole="Reservation" ToRole="User_details" />
         </EntityType>
         <EntityType Name="Route">
           <Key>
@@ -316,6 +300,7 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
           <Property Name="password" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="address" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Passengers" Relationship="Self.FK__Passenger__user___5EBF139D" FromRole="User_details" ToRole="Passenger" />
+          <NavigationProperty Name="Reservations" Relationship="Self.FK__Reservati__user___3F115E1A" FromRole="User_details" ToRole="Reservation" />
         </EntityType>
         <Association Name="FK__Bus__category_id__4AB81AF0">
           <End Role="Category" Type="Self.Category" Multiplicity="0..1">
@@ -343,7 +328,7 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Bus_Seat__bus_id__29221CFB">
+        <Association Name="FK__Bus_Seat__bus_id__3D2915A8">
           <End Role="Bus" Type="Self.Bus" Multiplicity="0..1" />
           <End Role="Bus_Seat" Type="Self.Bus_Seat" Multiplicity="*" />
           <ReferentialConstraint>
@@ -383,21 +368,21 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Reservati__passe__5FB337D6">
-          <End Role="Passenger" Type="Self.Passenger" Multiplicity="1">
+        <Association Name="FK__Reservati__user___3F115E1A">
+          <End Role="User_details" Type="Self.User_details" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
           <End Role="Reservation" Type="Self.Reservation" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Passenger">
-              <PropertyRef Name="passenger_id" />
+            <Principal Role="User_details">
+              <PropertyRef Name="user_id" />
             </Principal>
             <Dependent Role="Reservation">
-              <PropertyRef Name="passenger_id" />
+              <PropertyRef Name="user_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="DatabaseEntity2" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="DatabaseEntity7" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Buses" EntityType="Self.Bus" />
           <EntitySet Name="Bus_Seat" EntityType="Self.Bus_Seat" />
           <EntitySet Name="Categories" EntityType="Self.Category" />
@@ -413,7 +398,7 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
             <End Role="Route" EntitySet="Routes" />
             <End Role="Bus" EntitySet="Buses" />
           </AssociationSet>
-          <AssociationSet Name="FK__Bus_Seat__bus_id__29221CFB" Association="Self.FK__Bus_Seat__bus_id__29221CFB">
+          <AssociationSet Name="FK__Bus_Seat__bus_id__3D2915A8" Association="Self.FK__Bus_Seat__bus_id__3D2915A8">
             <End Role="Bus" EntitySet="Buses" />
             <End Role="Bus_Seat" EntitySet="Bus_Seat" />
           </AssociationSet>
@@ -425,8 +410,8 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
             <End Role="User_details" EntitySet="User_details" />
             <End Role="Passenger" EntitySet="Passengers" />
           </AssociationSet>
-          <AssociationSet Name="FK__Reservati__passe__5FB337D6" Association="Self.FK__Reservati__passe__5FB337D6">
-            <End Role="Passenger" EntitySet="Passengers" />
+          <AssociationSet Name="FK__Reservati__user___3F115E1A" Association="Self.FK__Reservati__user___3F115E1A">
+            <End Role="User_details" EntitySet="User_details" />
             <End Role="Reservation" EntitySet="Reservations" />
           </AssociationSet>
         </EntityContainer>
@@ -435,7 +420,7 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="DatabaseModelStoreContainer" CdmEntityContainer="DatabaseEntity2">
+        <EntityContainerMapping StorageEntityContainer="DatabaseModelStoreContainer" CdmEntityContainer="DatabaseEntity7">
           <EntitySetMapping Name="Buses">
             <EntityTypeMapping TypeName="DatabaseModel.Bus">
               <MappingFragment StoreEntitySet="Bus">
@@ -485,9 +470,9 @@ error 6004: The table 'C:\USERS\PRAVEENSH\DESKTOP\ANGULARJSWEBAPI\ANGULARJSWEBAP
               <MappingFragment StoreEntitySet="Reservation">
                 <ScalarProperty Name="reservation_id" ColumnName="reservation_id" />
                 <ScalarProperty Name="bus_id" ColumnName="bus_id" />
-                <ScalarProperty Name="passenger_id" ColumnName="passenger_id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
                 <ScalarProperty Name="date_of_journey" ColumnName="date_of_journey" />
-                <ScalarProperty Name="seat_no" ColumnName="seat_no" />
+                <ScalarProperty Name="total_fare" ColumnName="total_fare" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

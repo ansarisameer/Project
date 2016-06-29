@@ -1,0 +1,58 @@
+﻿@model IEnumerable<AngularJSWebApi.Models.Reservation>
+
+@{
+    ViewBag.Title = "History";
+}
+
+<h2 style="color:teal;">Booking History</h2>
+
+@if(ViewBag.count==0)
+ {
+    <h4 style="color:Red;">Currently Booking History is Empty</h4>
+}
+else
+{
+    <table class="table">
+    <tr>
+        <th>
+                Reservation ID
+        </th>
+        <th>
+                 User Name
+        </th>
+        <th>
+                Bus Name
+        </th>
+        <th>
+                Bus No
+        </th>
+        <th>Booking Date</th>
+        <th>Total Fare</th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.reservation_id)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.User_details.name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Bus.bus_name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Bus.bus_no)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Bus.start_date)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.total_fare)
+        </td>
+    </tr>
+}
+
+</table>
+}
+

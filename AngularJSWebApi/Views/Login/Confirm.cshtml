@@ -7,8 +7,15 @@
 <h2 style="color:red;">Booking Done Successfully</h2>
 
 <h3 style="color:teal;text-decoration:underline">Reservation Details</h3>
-<h4 style="color:brown;text-align:center">Bus Info</h4>
 <table class="table" border="1">
+    <tr>
+        <th>
+            Reservation Id
+        </th>
+        <td>
+            @ViewBag.rid
+        </td>
+    </tr>
     <tr>
         <th>Bus No</th>
         <td>@ViewBag.bus_no</td>
@@ -40,6 +47,7 @@
     <tr>
         <th>Passenger Name</th>
         <th>Age</th>
+        <th>Gender</th>
     </tr>
   @foreach(var p in Model)
   {
@@ -49,6 +57,9 @@
           </td>
           <td>
               @p.age
+          </td>
+          <td>
+              @p.gender
           </td>
       </tr>
   }

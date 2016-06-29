@@ -12,15 +12,15 @@ namespace AngularJSWebApi.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Reservation
+    public partial class Ticket_price_details
     {
-        public int reservation_id { get; set; }
-        public int bus_id { get; set; }
-        public int user_id { get; set; }
+        public int tid { get; set; }
+        public Nullable<decimal> total_amount { get; set; }
+        public Nullable<int> user_id { get; set; }
+        public Nullable<int> bus_id { get; set; }
         public Nullable<System.DateTime> date_of_journey { get; set; }
-        public Nullable<int> total_fare { get; set; }
     
-        public virtual Bus Bus { get; set; }
+        public virtual Route Route { get; set; }
         public virtual User_details User_details { get; set; }
     }
 }

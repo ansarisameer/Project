@@ -13,10 +13,10 @@ namespace AngularJSWebApi.Models
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class DatabaseEntity2 : DbContext
+    public partial class DatabaseEntity7 : DbContext
     {
-        public DatabaseEntity2()
-            : base("name=DatabaseEntity2")
+        public DatabaseEntity7()
+            : base("name=DatabaseEntity7")
         {
         }
     

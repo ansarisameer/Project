@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-  <EntityContainerMapping StorageEntityContainer="DatabaseModelStoreContainer" CdmEntityContainer="DatabaseEntity2">
+  <EntityContainerMapping StorageEntityContainer="DatabaseModelStoreContainer" CdmEntityContainer="DatabaseEntity7">
     <EntitySetMapping Name="Buses">
       <EntityTypeMapping TypeName="DatabaseModel.Bus">
         <MappingFragment StoreEntitySet="Bus">
@@ -50,9 +50,9 @@
         <MappingFragment StoreEntitySet="Reservation">
           <ScalarProperty Name="reservation_id" ColumnName="reservation_id" />
           <ScalarProperty Name="bus_id" ColumnName="bus_id" />
-          <ScalarProperty Name="passenger_id" ColumnName="passenger_id" />
+          <ScalarProperty Name="user_id" ColumnName="user_id" />
           <ScalarProperty Name="date_of_journey" ColumnName="date_of_journey" />
-          <ScalarProperty Name="seat_no" ColumnName="seat_no" />
+          <ScalarProperty Name="total_fare" ColumnName="total_fare" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>
